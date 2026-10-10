@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Barun Vehicle Rental — a premium vehicle rental platform for cars, bikes, scooters, and more." />
+  <title>Barun Vehicle Rental — Premium Vehicle Rentals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #10251f;
+      --muted: #70817b;
+      --cream: #f7f4f8;
+      --white: #ffffff;
+      --line: #e5eae5;
+      --mint: #dff3e7;
+      --green: #1d6a4c;
+      --deep-green: #123b2d;
+      --lime: #c9ef75;
+      --coral: #ff806c;
+      --shadow: 0 24px 70px rgba(18, 59, 45, 0.12);
+      --radius-lg: 30px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--cream); color: var(--ink); font-family: "DM Sans", sans-serif; line-height: 1.5; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    .container { width: min(1180px, calc(100% - 44px)); margin: 0 auto; }
+
+    header { padding: 22px 0; background: rgba(247,248,244,.9); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); border-bottom: 1px solid rgba(229,234,229,.7); }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-family: Manrope, sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -.04em; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; color: var(--white); background: var(--deep-green); border-radius: 11px; transform: rotate(-8deg); }
+    .brand-mark span { transform: rotate(8deg); font-size: 17px; }
+    .nav-links { display: flex; gap: 30px; color: var(--muted); font-size: 14px; font-weight: 600; }
+    .nav-links a:hover { color: var(--green); }
+    .nav-actions { display: flex; align-items: center; gap: 13px; }
+    .login { color: var(--ink); font-size: 14px; font-weight: 700; padding: 10px 8px; }
+    .btn { padding: 13px 19px; border-radius: 12px; color: var(--white); background: var(--deep-green); font-weight: 700; font-size: 14px; transition: .25s ease; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(18,59,45,.2); }
+    .btn-lime { color: var(--deep-green); background: var(--lime); }
+
+    .hero { padding: 78px 0 65px; position: relative; overflow: hidden; }
+    .hero:before { content: ""; position: absolute; width: 490px; height: 490px; border-radius: 50%; background: var(--mint); filter: blur(1px); right: -190px; top: -130px; z-index: -1; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--green); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 18px; }
+    .eyebrow:before { content: ""; width: 24px; height: 2px; background: var(--coral); }
+    h1, h2, h3 { font-family: Manrope, sans-serif; letter-spacing: -.06em; line-height: 1.04; }
+    h1 { max-width: 730px; font-size: clamp(45px, 7vw, 84px); }
+    h1 em { color: var(--green); font-style: normal; }
+    .hero-copy { color: var(--muted); max-width: 520px; margin: 24px 0 33px; font-size: 17px; }
+    .hero-grid { display: grid; grid-template-columns: 1fr .88fr; gap: 60px; align-items: center; }
+    .hero-art { min-height: 360px; border-radius: 32px; position: relative; overflow: hidden; background: linear-gradient(145deg, #b8d9ca, #eef3e8); box-shadow: var(--shadow); }
+    .hero-art img { width: 100%; height: 100%; min-height: 360px; object-fit: cover; mix-blend-mode: multiply; opacity: .88; }
+    .hero-card { position: absolute; left: 22px; bottom: 22px; padding: 15px 17px; border-radius: 16px; color: var(--white); background: rgba(16,37,31,.88); backdrop-filter: blur(10px); }
+    .hero-card small { color: #b9cec4; display: block; font-size: 11px; margin-bottom: 4px; }
+    .hero-card strong { font-size: 15px; }
+    .rating { position: absolute; right: 22px; top: 22px; background: var(--white); padding: 11px 13px; border-radius: 14px; font-weight: 800; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,.08); }
+
+    .search-box { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1.05fr auto; gap: 9px; align-items: end; padding: 14px; background: var(--white); border: 1px solid var(--line); border-radius: 19px; box-shadow: 0 16px 40px rgba(18,59,45,.08); margin-top: 18px; }
+    .field { padding: 2px 10px; }
+    .field label { display: block; color: var(--muted); font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+    .field input, .field select { width: 100%; color: var(--ink); font-size: 14px; font-weight: 700; border: 0; outline: none; background: transparent; }
+    .search-btn { min-height: 48px; padding: 0 20px; border-radius: 13px; color: var(--deep-green); background: var(--lime); font-weight: 800; }
+
+    .section { padding: 65px 0; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 28px; gap: 20px; }
+    .section-head h2 { font-size: clamp(30px, 4vw, 46px); }
+    .section-head p { color: var(--muted); max-width: 390px; font-size: 14px; }
+    .text-link { color: var(--green); font-size: 14px; font-weight: 800; white-space: nowrap; }
+    .categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .category { min-height: 150px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--white); transition: .25s; }
+    .category:hover, .category.active { background: var(--deep-green); color: var(--white); transform: translateY(-4px); box-shadow: var(--shadow); }
+    .category-icon { font-size: 32px; }
+    .category strong { font-family: Manrope, sans-serif; font-size: 18px; }
+    .category span { color: var(--muted); font-size: 12px; }
+    .category:hover span, .category.active span { color: #b9cec4; }
+
+    .fleet { background: var(--white); }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter { padding: 9px 15px; color: var(--muted); background: var(--cream); border-radius: 99px; font-size: 13px; font-weight: 700; }
+    .filter.active, .filter:hover { color: var(--white); background: var(--green); }
+    .vehicle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .vehicle { border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: var(--white); transition: .25s; }
+    .vehicle:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+    .vehicle-image { height: 190px; position: relative; background: #e9eee9; }
+    .vehicle-image img { width: 100%; height: 100%; object-fit: cover; }
+    .tag { position: absolute; top: 13px; left: 13px; padding: 6px 9px; border-radius: 7px; color: var(--deep-green); background: var(--lime); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+    .heart { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; color: var(--deep-green); background: rgba(255,255,255,.9); font-size: 17px; }
+    .vehicle-info { padding: 17px; }
+    .vehicle-title { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
+    .vehicle h3 { font-size: 19px; letter-spacing: -.04em; }
+    .price { color: var(--green); font-weight: 900; white-space: nowrap; }
+    .price small { color: var(--muted); font-size: 11px; font-weight: 500; }
+    .specs { display: flex; gap: 12px; color: var(--muted); font-size: 12px; margin: 12px 0 17px; }
+    .vehicle .btn { display: block; text-align: center; width: 100%; padding: 11px; }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { padding: 28px; border-radius: 22px; background: var(--mint); }
+    .feature:nth-child(2) { background: #fff0d8; }
+    .feature:nth-child(3) { background: #e9e5fb; }
+    .feature-icon { font-size: 28px; margin-bottom: 28px; }
+    .feature h3 { font-size: 21px; margin-bottom: 9px; }
+    .feature p { color: var(--muted); font-size: 14px; }
+
+    .cta { padding: 68px 0; }
+    .cta-card { display: flex; justify-content: space-between; align-items: center; gap: 30px; padding: 46px; border-radius: 28px; color: var(--white); background: var(--deep-green); overflow: hidden; position: relative; }
+    .cta-card:after { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(201,239,117,.35); right: 10%; top: -180px; box-shadow: 0 0 0 28px rgba(201,239,117,.06), 0 0 0 56px rgba(201,239,117,.04); }
+    .cta-card h2 { max-width: 520px; font-size: clamp(29px, 4vw, 45px); }
+    .cta-card p { max-width: 480px; color: #b9cec4; margin-top: 12px; font-size: 14px; }
+    .cta-card .btn { position: relative; z-index: 1; flex-shrink: 0; }
+    footer { padding: 28px 0 40px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
+    .footer-row { display: flex; justify-content: space-between; gap: 18px; }
+
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; padding: 14px 18px; color: var(--white); background: var(--deep-green); border-radius: 12px; box-shadow: var(--shadow); font-size: 14px; transform: translateY(130px); opacity: 0; transition: .3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 820px) {
+      .nav-links { display: none; }
+      .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+      .hero { padding-top: 48px; }
+      .search-box { grid-template-columns: repeat(2, 1fr); }
+      .search-btn { grid-column: span 2; }
+      .categories, .vehicle-grid { grid-template-columns: repeat(2, 1fr); }
+      .features { grid-template-columns: 1fr; }
+      .cta-card { flex-direction: column; align-items: start; padding: 34px; }
+    }
+    @media (max-width: 520px) {
+      .container { width: min(100% - 28px, 1180px); }
+      .nav-actions .login { display: none; }
+      .categories, .vehicle-grid { grid-template-columns: 1fr; }
+      .search-box { grid-template-columns: 1fr; }
+      .search-btn { grid-column: auto; }
+      .section { padding: 46px 0; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 12px; }
+      .footer-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top"><span class="brand-mark"><span>B</span></span> Barun Vehicle Rental</a>
+      <nav class="nav-links" aria-label="Main navigation"><a href="#rent">Rent a vehicle</a><a href="#how-it-works">How it works</a><a href="#providers">For providers</a></nav>
+      <div class="nav-actions"><a class="login" href="#">Log in</a><a class="btn" href="#rent">Get started</a></div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">Move freely, live fully</div>
+          <h1>Your next journey starts <em>here.</em></h1>
+          <p class="hero-copy">Discover cars, bikes and scooters from trusted local providers. Compare, book and hit the road — all in one effortless place.</p>
+          <div class="search-box" id="rent">
+            <div class="field"><label>Pick-up location</label><input id="location" type="text" placeholder="City or airport" /></div>
+            <div class="field"><label>Pick-up date</label><input id="startDate" type="date" /></div>
+            <div class="field"><label>Return date</label><input id="endDate" type="date" /></div>
+            <div class="field"><label>Vehicle type</label><select id="vehicleType"><option value="all">All vehicles</option><option value="car">Cars</option><option value="bike">Bikes</option><option value="scooter">Scooters</option></select></div>
+            <button class="search-btn" onclick="searchVehicles()">Search fleet</button>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=85" alt="Premium sports car on a road" />
+          <div class="rating">★ 4.9 <span style="color:#70817b;font-weight:500">from 12k+ rides</span></div>
+          <div class="hero-card"><small>Featured ride</small><strong>Range Rover Evoque · Automatic</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <div class="section-head"><div><div class="eyebrow">One platform, every ride</div><h2>Choose your way<br />to move.</h2></div><p>Whether it is a weekend escape or your daily commute, find a vehicle that fits your plans and your pace.</p></div>
+        <div class="categories">
+          <button class="category active" data-filter="all"><span class="category-icon">✦</span><strong>All vehicles</strong><span>1,240+ available</span></button>
+          <button class="category" data-filter="car"><span class="category-icon">🚙</span><strong>Cars</strong><span>Premium to practical</span></button>
+          <button class="category" data-filter="bike"><span class="category-icon">🏍</span><strong>Bikes</strong><span>Freedom on two wheels</span></button>
+          <button class="category" data-filter="scooter"><span class="category-icon">🛵</span><strong>Scooters</strong><span>Easy city rides</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fleet" id="fleet">
+      <div class="container">
+        <div class="section-head"><div><div class="eyebrow">Curated for you</div><h2>Popular near you.</h2></div><a href="#fleet" class="text-link">Explore all vehicles →</a></div>
+        <div class="filter-bar"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="car">Cars</button><button class="filter" data-filter="bike">Bikes</button><button class="filter" data-filter="scooter">Scooters</button></div>
+        <div class="vehicle-grid">
+          <article class="vehicle" data-type="car"><div class="vehicle-image"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=900&q=80" alt="White BMW sedan" /><span class="tag">Top rated</span><button class="heart" aria-label="Save vehicle">♡</button></div><div class="vehicle-info"><div class="vehicle-title"><h3>BMW 3 Series</h3><div class="price">₹4,200 <small>/ day</small></div></div><div class="specs"><span>⌁ Automatic</span><span>♙ 5 seats</span><span>◉ Petrol</span></div><button class="btn book-btn">View details</button></div></article>
+          <article class="vehicle" data-type="bike"><div class="vehicle-image"><img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80" alt="Black motorbike" /><span class="tag">Best value</span><button class="heart" aria-label="Save vehicle">♡</button></div><div class="vehicle-info"><div class="vehicle-title"><h3>Royal Enfield Hunter</h3><div class="price">₹1,100 <small>/ day</small></div></div><div class="specs"><span>⌁ Manual</span><span>♙ 2 seats</span><span>◉ Petrol</span></div><button class="btn book-btn">View details</button></div></article>
+          <article class="vehicle" data-type="scooter"><div class="vehicle-image"><img src="https://images.unsplash.com/photo-1558981285-6f0c94958bb6?auto=format&fit=crop&w=900&q=80" alt="Modern red scooter" /><span class="tag">City pick</span><button class="heart" aria-label="Save vehicle">♡</button></div><div class="vehicle-info"><div class="vehicle-title"><h3>Vespa Primavera</h3><div class="price">₹750 <small>/ day</small></div></div><div class="specs"><span>⌁ Automatic</span><span>♙ 2 seats</span><span>◉ Petrol</span></div><button class="btn book-btn">View details</button></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="providers"><div class="container"><div class="section-head"><div><div class="eyebrow">Made for momentum</div><h2>Everything you need<br />to rent better.</h2></div><p>From your first search to the final kilometre, Veloce keeps the entire experience simple, transparent and in your control.</p></div><div class="features"><div class="feature"><div class="feature-icon">◫</div><h3>Compare with clarity</h3><p>See real-time pricing, availability, vehicle specs and customer reviews before you commit.</p></div><div class="feature"><div class="feature-icon">⌁</div><h3>Book in a few taps</h3><p>Secure online payments, instant confirmations and flexible rental dates make planning effortless.</p></div><div class="feature"><div class="feature-icon">◉</div><h3>Manage every detail</h3><p>Track your rental, receive notifications and reach support whenever you need it.</p></div></div></div></section>
+
+    <section class="cta"><div class="container"><div class="cta-card"><div><h2>Have vehicles to share?</h2><p>Join a growing network of providers. Manage listings, availability, bookings, payments and maintenance from one powerful dashboard.</p></div><a class="btn btn-lime" href="#" onclick="showToast('Provider registration coming soon!'); return false;">Become a provider →</a></div></div></section>
+  </main>
+
+  <footer><div class="container footer-row"><span>© 2025 Veloce Mobility Technologies</span><span>Secure bookings · Verified providers · 24/7 support</span></div></footer>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const filters = document.querySelectorAll('[data-filter]');
+    const vehicles = document.querySelectorAll('.vehicle');
+    function setFilter(type) {
+      vehicles.forEach(vehicle => vehicle.style.display = type === 'all' || vehicle.dataset.type === type ? '' : 'none');
+      document.querySelectorAll('.filter, .category').forEach(button => button.classList.toggle('active', button.dataset.filter === type));
+      document.getElementById('fleet').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    filters.forEach(button => button.addEventListener('click', () => setFilter(button.dataset.filter)));
+    document.querySelectorAll('.heart').forEach(button => button.addEventListener('click', () => { button.textContent = button.textContent === '♡' ? '♥' : '♡'; button.style.color = button.textContent === '♥' ? '#ff806c' : ''; }));
+    document.querySelectorAll('.book-btn').forEach(button => button.addEventListener('click', () => showToast('Vehicle details selected — choose your dates above to continue.')));
+    function searchVehicles() {
+      const type = document.getElementById('vehicleType').value;
+      const location = document.getElementById('location').value.trim();
+      if (!location) { showToast('Add a pick-up location to search the fleet.'); document.getElementById('location').focus(); return; }
+      setFilter(type);
+      showToast(`Showing ${type === 'all' ? 'all vehicles' : type + 's'} near ${location}.`);
+    }
+    function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => toast.classList.remove('show'), 3500); }
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').min = today; document.getElementById('endDate').min = today;
+    document.getElementById('startDate').addEventListener('change', e => document.getElementById('endDate').min = e.target.value);
+  </script>
+</body>
+</html>

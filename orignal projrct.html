@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FactoryVision | Quality Inspection System</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #050914;
+      --panel: rgba(11, 21, 38, .72);
+      --panel-strong: rgba(13, 29, 52, .94);
+      --line: rgba(88, 214, 255, .22);
+      --cyan: #58d6ff;
+      --blue: #6c7bff;
+      --green: #54f2ad;
+      --red: #ff6b83;
+      --yellow: #ffd166;
+      --text: #edf7ff;
+      --muted: #8fa7bd;
+      --shadow: 0 22px 70px rgba(0,0,0,.38);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -4;
+      background: radial-gradient(circle at 50% 0%, #142b50 0%, #080f22 38%, #050914 100%);
+    }
+    .scanlines, .scanlines::after {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    }
+    .scanlines { opacity: .2; background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(88,214,255,.05) 5px); }
+    .scanlines::after { content: ''; background: linear-gradient(90deg, rgba(88,214,255,.08), transparent 20%, transparent 80%, rgba(108,123,255,.08)); }
+
+    header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between; gap: 28px;
+      padding: 18px clamp(20px, 5vw, 72px);
+      background: rgba(5, 9, 20, .68);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 35px rgba(0,0,0,.2);
+    }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: max-content; }
+    .brand-orb {
+      width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+      color: #03101b; font-weight: 900; font-family: Orbitron; font-size: 18px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 0 25px rgba(88,214,255,.58), inset 0 0 13px #fff;
+      transform: rotate(-8deg); animation: float 3s ease-in-out infinite;
+    }
+    .brand h1 { margin: 0; font: 800 17px Orbitron; letter-spacing: 1px; }
+    .brand small { display: block; color: var(--cyan); letter-spacing: 2px; font-size: 9px; margin-top: 3px; }
+    nav { display: flex; gap: 8px; }
+    nav a { color: var(--muted); text-decoration: none; padding: 9px 13px; border-radius: 9px; transition: .25s; }
+    nav a:hover, nav a.active { color: var(--text); background: rgba(88,214,255,.11); box-shadow: 0 0 18px rgba(88,214,255,.12); }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--green); font-size: 12px; white-space: nowrap; }
+    .pulse { width: 9px; height: 9px; background: var(--green); border-radius: 50%; box-shadow: 0 0 0 0 rgba(84,242,173,.7); animation: pulse 1.6s infinite; }
+
+    main { width: min(1420px, 92%); margin: 0 auto; padding: 55px 0 80px; }
+    .hero { text-align: center; max-width: 850px; margin: 0 auto 42px; }
+    .eyebrow { color: var(--cyan); font: 700 11px Orbitron; letter-spacing: 3px; }
+    .hero h2 { font: 800 clamp(35px, 6vw, 72px) Orbitron; line-height: 1.05; margin: 16px 0; text-shadow: 0 0 25px rgba(88,214,255,.3); }
+    .hero h2 span { color: var(--cyan); }
+    .hero p { color: var(--muted); font-size: 16px; line-height: 1.7; margin: 0 auto; max-width: 680px; }
+
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 28px; }
+    .metric, .panel {
+      position: relative; background: linear-gradient(145deg, rgba(21,40,68,.83), rgba(7,16,31,.78));
+      border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow), inset 0 1px rgba(255,255,255,.08);
+      backdrop-filter: blur(17px); transform: perspective(1000px) rotateX(.7deg); transition: transform .3s, border-color .3s;
+    }
+    .metric:hover, .panel:hover { transform: perspective(1000px) rotateX(0deg) translateY(-3px); border-color: rgba(88,214,255,.55); }
+    .metric { padding: 20px; overflow: hidden; }
+    .metric::after { content: ''; position: absolute; width: 120px; height: 120px; border-radius: 50%; right: -38px; top: -55px; background: var(--glow, var(--cyan)); opacity: .1; filter: blur(4px); }
+    .metric-label { color: var(--muted); font-size: 12px; }
+    .metric-value { font: 800 30px Orbitron; margin-top: 7px; }
+    .metric-value.green { color: var(--green); } .metric-value.red { color: var(--red); }
+
+    .layout { display: grid; grid-template-columns: minmax(310px, .82fr) minmax(430px, 1.8fr); gap: 24px; align-items: start; }
+    .panel { padding: 26px; }
+    .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 17px; margin-bottom: 20px; }
+    .panel-title h3 { margin: 0; font: 700 17px Orbitron; letter-spacing: .5px; }
+    .chip { font-size: 10px; color: var(--cyan); border: 1px solid rgba(88,214,255,.35); border-radius: 99px; padding: 6px 9px; background: rgba(88,214,255,.08); }
+    label { display: block; color: #bbd0e1; font-size: 12px; margin: 14px 0 7px; }
+    input, select {
+      width: 100%; border: 1px solid rgba(143,167,189,.25); color: var(--text); background: rgba(2,8,18,.62);
+      padding: 12px 13px; border-radius: 9px; outline: none; font: inherit; transition: .2s;
+    }
+    input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(88,214,255,.1), 0 0 20px rgba(88,214,255,.12); }
+    input[type="date"] { color-scheme: dark; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .radio-row { display: flex; gap: 10px; }
+    .radio-card { flex: 1; position: relative; }
+    .radio-card input { position: absolute; opacity: 0; }
+    .radio-card span { display: block; text-align: center; cursor: pointer; padding: 11px 7px; border-radius: 9px; border: 1px solid rgba(143,167,189,.25); color: var(--muted); font-size: 13px; }
+    .radio-card input:checked + span { border-color: var(--green); background: rgba(84,242,173,.13); color: var(--green); box-shadow: 0 0 17px rgba(84,242,173,.12); }
+    .radio-card.fail input:checked + span { color: var(--red); border-color: var(--red); background: rgba(255,107,131,.12); }
+    .defects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .defects label { margin: 0; display: flex; gap: 8px; align-items: center; padding: 8px; border: 1px solid transparent; border-radius: 7px; cursor: pointer; }
+    .defects label:hover { border-color: var(--line); background: rgba(88,214,255,.06); }
+    .defects input { width: auto; accent-color: var(--cyan); }
+    .submit-btn { width: 100%; border: 0; border-radius: 10px; padding: 14px; margin-top: 22px; color: #04101a; background: linear-gradient(100deg, var(--cyan), #9fafff); font: 800 13px Orbitron; cursor: pointer; box-shadow: 0 9px 25px rgba(88,214,255,.2); transition: .25s; }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(88,214,255,.35); }
+
+    .table-tools { display: flex; align-items: center; gap: 10px; }
+    .table-tools input { max-width: 190px; padding: 8px 10px; font-size: 12px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; }
+    th { color: var(--cyan); font: 600 10px Orbitron; letter-spacing: .8px; text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+    td { color: #d9e9f5; font-size: 12px; padding: 15px 10px; border-bottom: 1px solid rgba(143,167,189,.11); vertical-align: middle; }
+    tr { transition: .2s; } tbody tr:hover { background: rgba(88,214,255,.07); }
+    .id { color: var(--cyan); font-family: Orbitron; font-size: 11px; }
+    .badge { display: inline-block; padding: 5px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .badge.pass { color: var(--green); background: rgba(84,242,173,.12); } .badge.fail { color: var(--red); background: rgba(255,107,131,.13); }
+    .defect-tag { color: var(--yellow); font-size: 10px; }
+    .empty { text-align: center; color: var(--muted); padding: 35px; }
+    footer { text-align: center; padding: 25px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    footer strong { color: var(--cyan); font-family: Orbitron; }
+    .toast { position: fixed; right: 22px; bottom: 22px; padding: 14px 18px; border: 1px solid var(--green); border-radius: 10px; color: var(--green); background: var(--panel-strong); box-shadow: var(--shadow); transform: translateY(100px); opacity: 0; transition: .35s; z-index: 20; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .visualizer-panel { grid-column: 1 / -1; }
+    .visualizer-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; align-items: stretch; }
+    #productVisualizer { min-height: 390px; height: 390px; border: 1px solid rgba(88,214,255,.2); border-radius: 13px; overflow: hidden; background: radial-gradient(circle at 50% 45%, rgba(40,95,136,.25), rgba(2,8,18,.8)); position: relative; }
+    #productVisualizer canvas { display: block; width: 100%; height: 100%; }
+    .visualizer-controls { padding: 18px; border: 1px solid rgba(88,214,255,.15); border-radius: 13px; background: rgba(2,8,18,.4); }
+    .visualizer-controls h4 { margin: 0 0 12px; font: 700 12px Orbitron; color: var(--cyan); }
+    .visualizer-controls p { color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .visualizer-controls .submit-btn { margin-top: 12px; padding: 11px; font-size: 11px; }
+    .legend { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; margin-top: 14px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); }
+    .export-btn { border: 1px solid rgba(88,214,255,.35); border-radius: 8px; padding: 8px 10px; color: var(--cyan); background: rgba(88,214,255,.08); font: 600 10px Orbitron; cursor: pointer; transition: .2s; }
+    .export-btn:hover { color: #06111b; background: var(--cyan); }
+    .table-tools { flex-wrap: wrap; justify-content: flex-end; }
+    @media print { body { background: white; color: #111; } #scene, .scanlines, header, .hero, .metrics, #inspection, .visualizer-panel, .table-tools, footer, .toast { display: none !important; } main { width: 100%; padding: 0; } .layout { display: block; } .panel { border: 0; box-shadow: none; color: #111; } th, td { color: #111; border-color: #bbb; } .panel-title { border-color: #888; }
+    }
+    @keyframes pulse { 70% { box-shadow: 0 0 0 9px rgba(84,242,173,0); } 100% { box-shadow: 0 0 0 0 rgba(84,242,173,0); } }
+    @keyframes float { 50% { transform: rotate(8deg) translateY(-5px); } }
+    @media (max-width: 950px) { header { flex-wrap: wrap; } .status { margin-left: auto; } .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 650px) { nav { order: 3; width: 100%; justify-content: center; } .metrics { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } main { width: 94%; padding-top: 35px; } .panel { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scanlines"></div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-orb">FQ</div>
+      <div><h1>FACTORYVISION</h1><small>QUALITY CONTROL // 3D CORE</small></div>
+    </div>
+    <nav aria-label="Main navigation">
+      <a href="#dashboard" class="active">Dashboard</a>
+      <a href="#inspection">New Inspection</a>
+      <a href="#records">Records</a>
+    </nav>
+    <div class="status"><span class="pulse"></span> SYSTEM ONLINE</div>
+  </header>
+
+  <main id="dashboard">
+    <section class="hero">
+      <div class="eyebrow">AUTOMATED PRODUCTION MONITORING</div>
+      <h2>Inspect. Verify.<br><span>Ship with confidence.</span></h2>
+      <p>A spatial quality-control console for capturing product inspections, detecting defects, and maintaining a perfect production record.</p>
+    </section>
+
+    <section class="panel visualizer-panel" id="visualizer">
+      <div class="panel-title"><h3>3D PRODUCT INSPECTION VISUALIZER</h3><span class="chip">THREE.JS // LIVE MODEL</span></div>
+      <div class="visualizer-layout">
+        <div id="productVisualizer" aria-label="Interactive 3D product model with defect markers"></div>
+        <aside class="visualizer-controls">
+          <h4>DEFECT LOCATION MAP</h4>
+          <p>Drag to orbit, scroll to zoom, and select a defect to highlight its location on the product model.</p>
+          <label for="defectSelector">Defect type</label>
+          <select id="defectSelector">
+            <option value="all">Show all markers</option>
+            <option value="Scratch">Scratch · front shell</option>
+            <option value="Broken part">Broken part · top assembly</option>
+            <option value="Wrong size">Wrong size · side rim</option>
+            <option value="Color problem">Color problem · rear panel</option>
+            <option value="Other">Other · base plate</option>
+          </select>
+          <button class="submit-btn" id="plotDefect" type="button">◎ PLOT LOCATION</button>
+          <div class="legend"><span class="legend-dot"></span> Defect marker</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Inspection statistics">
+      <div class="metric" style="--glow: var(--cyan)"><div class="metric-label">TOTAL INSPECTIONS</div><div class="metric-value" id="totalCount">0</div></div>
+      <div class="metric" style="--glow: var(--green)"><div class="metric-label">PASSED UNITS</div><div class="metric-value green" id="passCount">0</div></div>
+      <div class="metric" style="--glow: var(--red)"><div class="metric-label">FAILED UNITS</div><div class="metric-value red" id="failCount">0</div></div>
+      <div class="metric" style="--glow: var(--yellow)"><div class="metric-label">PASS RATE</div><div class="metric-value" id="passRate">0%</div></div>
+    </section>
+
+    <section class="layout">
+      <article class="panel" id="inspection">
+        <div class="panel-title"><h3>NEW INSPECTION</h3><span class="chip">INPUT MODULE</span></div>
+        <form id="inspectionForm">
+          <div class="two-col">
+            <div><label for="productId">Product ID</label><input id="productId" name="productId" placeholder="e.g. PRD-1048" required /></div>
+            <div><label for="batchNumber">Batch number</label><input id="batchNumber" name="batchNumber" placeholder="e.g. B-2026-09" required /></div>
+          </div>
+          <label for="productName">Product name</label><input id="productName" name="productName" placeholder="e.g. Precision Valve" required />
+          <label for="inspectorName">Inspector name</label><input id="inspectorName" name="inspectorName" placeholder="e.g. Alex Morgan" required />
+          <label for="inspectionDate">Inspection date</label><input type="date" id="inspectionDate" name="inspectionDate" required />
+          <label>Product quality</label>
+          <div class="radio-row">
+            <label class="radio-card"><input type="radio" name="quality" value="Pass" checked /><span>✓ PASS</span></label>
+            <label class="radio-card fail"><input type="radio" name="quality" value="Fail" /><span>× FAIL</span></label>
+          </div>
+          <label>Defect type(s)</label>
+          <div class="defects">
+            <label><input type="checkbox" name="defect" value="Scratch" /> Scratch</label>
+            <label><input type="checkbox" name="defect" value="Broken part" /> Broken part</label>
+            <label><input type="checkbox" name="defect" value="Wrong size" /> Wrong size</label>
+            <label><input type="checkbox" name="defect" value="Color problem" /> Color problem</label>
+            <label><input type="checkbox" name="defect" value="Other" /> Other</label>
+          </div>
+          <button class="submit-btn" type="submit">＋ RECORD INSPECTION</button>
+        </form>
+      </article>
+
+      <article class="panel" id="records">
+        <div class="panel-title"><h3>INSPECTION RECORDS</h3><div class="table-tools"><input id="searchBox" placeholder="Search records..." aria-label="Search records" /><button class="export-btn" id="csvBtn" type="button">↓ CSV</button><button class="export-btn" id="pdfBtn" type="button">▣ PRINT / PDF</button><span class="chip" id="recordCount">0 LIVE</span></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>PRODUCT</th><th>BATCH</th><th>INSPECTOR</th><th>DATE</th><th>QUALITY</th><th>DEFECTS</th></tr></thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+          <div class="empty" id="emptyState">No inspection records yet. Add the first product above.</div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer><strong>FACTORYVISION</strong> · 3D QUALITY-INSPECTION SYSTEM · <span id="year"></span></footer>
+  <div class="toast" id="toast">Inspection recorded successfully.</div>
+
+  <script>
+    // Animated 3D wireframe factory background
+    const canvas = document.getElementById('scene'), ctx = canvas.getContext('2d');
+    let W, H, points = [], lines = [], tick = 0;
+    function resize() { W = canvas.width = innerWidth * devicePixelRatio; H = canvas.height = innerHeight * devicePixelRatio; canvas.style.width = innerWidth+'px'; canvas.style.height = innerHeight+'px'; ctx.scale(devicePixelRatio, devicePixelRatio); W = innerWidth; H = innerHeight; buildScene(); }
+    function buildScene() {
+      points = []; lines = [];
+      for (let i=0; i<75; i++) points.push({x:(Math.random()-.5)*1700,y:(Math.random()-.5)*650,z:Math.random()*1000+100, s:Math.random()*2+1});
+      for (let i=0; i<11; i++) lines.push({x:Math.random()*W,y:H*.56+Math.random()*H*.2,len:80+Math.random()*180,speed:.2+Math.random()*.4});
+    }
+    function project(p) { const scale=440/(p.z+1); return {x:W/2+p.x*scale, y:H*.45+p.y*scale, scale}; }
+    function animate() {
+      tick += .004; ctx.clearRect(0,0,W,H);
+      const horizon=H*.54; ctx.strokeStyle='rgba(88,214,255,.12)'; ctx.lineWidth=1;
+      for(let i=-12;i<=12;i++){ const x=W/2+i*80; ctx.beginPath(); ctx.moveTo(W/2+(x-W/2)*.05,horizon); ctx.lineTo(x,H); ctx.stroke(); }
+      for(let i=0;i<9;i++){ const y=horizon+Math.pow(i/8,1.8)*(H-horizon); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+      points.forEach(p=>{ p.z-=1.25; if(p.z<90){p.z=1050;p.x=(Math.random()-.5)*1700;p.y=(Math.random()-.5)*650;} const q=project(p); ctx.fillStyle=`rgba(88,214,255,${Math.max(.08,1-p.z/1100)})`; ctx.beginPath(); ctx.arc(q.x,q.y,p.s*q.scale*2,0,Math.PI*2); ctx.fill(); });
+      lines.forEach(l=>{ l.x-=l.speed; if(l.x+l.len<0) l.x=W+l.len; ctx.strokeStyle='rgba(84,242,173,.38)'; ctx.beginPath(); ctx.moveTo(l.x,l.y); ctx.lineTo(l.x+l.len,l.y); ctx.stroke(); });
+      requestAnimationFrame(animate);
+    }
+    addEventListener('resize',resize); resize(); animate();
+
+    // Interactive Three.js product inspection visualizer
+    const visualizerHost = document.getElementById('productVisualizer');
+    const threeScene = new THREE.Scene();
+    const threeCamera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    threeCamera.position.set(4.5, 3.3, 6.2);
+    const threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    threeRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    threeRenderer.setClearColor(0x020812, 0);
+    visualizerHost.appendChild(threeRenderer.domElement);
+    const controls3d = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+    controls3d.enableDamping = true; controls3d.dampingFactor = .07; controls3d.minDistance = 4; controls3d.maxDistance = 10;
+    threeScene.add(new THREE.HemisphereLight(0x9ddcff, 0x07101e, 1.4));
+    const keyLight = new THREE.PointLight(0x58d6ff, 2.4, 15); keyLight.position.set(3, 5, 4); threeScene.add(keyLight);
+    const rimLight = new THREE.PointLight(0x6c7bff, 2.1, 15); rimLight.position.set(-4, 2, -4); threeScene.add(rimLight);
+    const product = new THREE.Group(); threeScene.add(product);
+    const shell = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 2.4, 48), new THREE.MeshPhysicalMaterial({ color: 0x1a6c9a, metalness: .72, roughness: .22, clearcoat: .7 })); shell.rotation.z = Math.PI / 2; product.add(shell);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.47, .07, 14, 48), new THREE.MeshBasicMaterial({ color: 0x58d6ff })); ring.rotation.y = Math.PI / 2; product.add(ring);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.12, 1.12, .22, 40), new THREE.MeshPhysicalMaterial({ color: 0x9fafff, metalness: .7, roughness: .2 })); cap.rotation.z = Math.PI / 2; cap.position.x = 1.22; product.add(cap);
+    const base = new THREE.Mesh(new THREE.TorusGeometry(.65, .12, 12, 36), new THREE.MeshBasicMaterial({ color: 0x54f2ad })); base.rotation.y = Math.PI/2; base.position.x = -1.27; product.add(base);
+    const markerSpecs = { 'Scratch': [1.38, .48, .68], 'Broken part': [.15, 1.25, .18], 'Wrong size': [0, -.45, 1.42], 'Color problem': [-1.38, .55, -.5], 'Other': [-.8, -1.1, 0] };
+    const markers = {};
+    Object.entries(markerSpecs).forEach(([name, pos]) => { const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 20, 20), new THREE.MeshBasicMaterial({ color: 0xff6b83, transparent: true, opacity: .95 })); m.position.set(...pos); m.userData.name = name; product.add(m); markers[name] = m; });
+    const grid = new THREE.GridHelper(8, 16, 0x1d6080, 0x103044); grid.position.y = -1.9; grid.material.transparent = true; grid.material.opacity = .45; threeScene.add(grid);
+    function resizeVisualizer() { const w = visualizerHost.clientWidth, h = visualizerHost.clientHeight; threeCamera.aspect = w / h; threeCamera.updateProjectionMatrix(); threeRenderer.setSize(w, h, false); }
+    addEventListener('resize', resizeVisualizer); resizeVisualizer();
+    let highlighted = 'all';
+    function updateMarkers() { Object.entries(markers).forEach(([name, m]) => { const active = highlighted === 'all' || highlighted === name; m.visible = active; m.scale.setScalar(active && highlighted !== 'all' ? 1.65 : 1); }); }
+    document.getElementById('defectSelector').addEventListener('change', e => { highlighted = e.target.value; updateMarkers(); });
+    document.getElementById('plotDefect').addEventListener('click', () => { highlighted = document.getElementById('defectSelector').value; updateMarkers(); product.rotation.y += .4; });
+    function animateProduct() { requestAnimationFrame(animateProduct); product.rotation.y += .0025; markers['Scratch'].scale.setScalar(1 + Math.sin(Date.now() / 180) * .18); controls3d.update(); threeRenderer.render(threeScene, threeCamera); }
+    animateProduct();
+
+    const form = document.getElementById('inspectionForm'), body = document.getElementById('recordsBody'), empty = document.getElementById('emptyState'), search = document.getElementById('searchBox');
+    let records = JSON.parse(localStorage.getItem('factoryRecords') || '[]');
+    document.getElementById('inspectionDate').valueAsDate = new Date(); document.getElementById('year').textContent = new Date().getFullYear();
+    function render() {
+      const query = search.value.toLowerCase(); const visible = records.filter(r => Object.values(r).join(' ').toLowerCase().includes(query));
+      body.innerHTML = visible.map(r => `<tr><td><span class="id">${r.id}</span><br>${r.name}</td><td>${r.batch}</td><td>${r.inspector}</td><td>${r.date}</td><td><span class="badge ${r.quality.toLowerCase()}">${r.quality}</span></td><td><span class="defect-tag">${r.defects.length ? r.defects.join(', ') : '— None detected'}</span></td></tr>`).join('');
+      empty.style.display = visible.length ? 'none' : 'block'; document.getElementById('recordCount').textContent = records.length + ' LIVE';
+      const pass=records.filter(r=>r.quality==='Pass').length, fail=records.length-pass; document.getElementById('totalCount').textContent=records.length; document.getElementById('passCount').textContent=pass; document.getElementById('failCount').textContent=fail; document.getElementById('passRate').textContent=records.length ? Math.round(pass/records.length*100)+'%' : '0%';
+    }
+    form.addEventListener('submit', e => { e.preventDefault(); const data=new FormData(form); const record={id:data.get('productId'),name:data.get('productName'),batch:data.get('batchNumber'),inspector:data.get('inspectorName'),date:data.get('inspectionDate'),quality:data.get('quality'),defects:data.getAll('defect')}; records.unshift(record); localStorage.setItem('factoryRecords',JSON.stringify(records)); render(); form.reset(); document.getElementById('inspectionDate').valueAsDate=new Date(); document.querySelector('input[value="Pass"]').checked=true; const toast=document.getElementById('toast'); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2600); });
+
+    function csvCell(value) { return '"' + String(value ?? '').replace(/"/g, '""') + '"'; }
+    document.getElementById('csvBtn').addEventListener('click', () => {
+      const rows = [['Product ID','Product name','Batch number','Inspector','Inspection date','Quality','Defects'], ...records.map(r => [r.id,r.name,r.batch,r.inspector,r.date,r.quality,r.defects.join('; ')])];
+      const blob = new Blob([rows.map(row => row.map(csvCell).join(',')).join('\n')], {type:'text/csv;charset=utf-8;'});
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'factory-inspection-records.csv'; link.click(); URL.revokeObjectURL(link.href);
+    });
+    document.getElementById('pdfBtn').addEventListener('click', () => window.print());
+    search.addEventListener('input', render); render();
+  </script>
+</body>
+</html>
